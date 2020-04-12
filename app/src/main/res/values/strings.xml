@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Pickwear</string>
+    <string name="back4app_app_id">zfCZZUsvxlmc24izzm51LZbEDGfwmcD5MVVqMnJD</string>
+    <string name="back4app_client_key">MGdsrbncNrXWcNZVpYYCdb45B3c4SJK1Uph5rPRS</string>
+    <string name="back4app_server_url">https://parseapi.back4app.com/</string>
+
+    <!-- activity swype -->
+    <string name="curti">Curti</string>
+    <string name="nao_curti">Não curti</string>
+</resources>
