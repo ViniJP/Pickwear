@@ -1,31 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_gravity="center_horizontal|bottom"
-    android:layout_marginBottom="20dp"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|bottom"
+    android:layout_marginBottom="25dp"
+    android:orientation="vertical">
 
-    <Button
-        android:id="@+id/left"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@drawable/fundo_dislike"
-        android:padding="6dp"
-        android:text="@string/nao_curti"
-        android:textColor="#ff0000"
-        android:textSize="14sp" />
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/right"
+        <Button
+            android:id="@+id/left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/fundo_dislike"
+            android:padding="6dp"
+            android:text="@string/nao_curti"
+            android:textColor="#ff0000"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/fundo_like"
+            android:padding="6dp"
+            android:text="@string/curti"
+            android:textColor="#009933"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@drawable/fundo_like"
-        android:padding="6dp"
-        android:text="@string/curti"
-        android:textColor="#009933"
-        android:textSize="14sp" />
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/t_switch_masculino"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:text="Masculino" />
+
+        <Switch
+            android:id="@+id/meuSwitchId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/t_switch_feminino"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:text="Feminino" />
+
+
+    </LinearLayout>
 
 </LinearLayout>

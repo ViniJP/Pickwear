@@ -1,20 +1,21 @@
 package com.example.pickwear;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Switch;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import com.parse.FindCallback;
@@ -27,7 +28,9 @@ import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -39,11 +42,27 @@ public class MainActivity extends AppCompatActivity {
     private Integer skip = 0;
     private String string;
     private Boolean aBoolean;
+    private Switch meuSwitch;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        meuSwitch = findViewById(R.id.meuSwitchId);
+
+        sharedPreferences = getSharedPreferences("preferencias", Context.MODE_PRIVATE);
+        if (sharedPreferences.contains("genero")) {
+            Boolean meuBoolean = sharedPreferences.getBoolean("genero", true);
+            meuSwitch.setChecked(meuBoolean);
+        } else {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("genero", true);
+            editor.apply();
+            meuSwitch.setChecked(true);
+        }
 
         ParseAnonymousUtils.logIn(new LogInCallback() {
             @Override
@@ -73,7 +92,24 @@ public class MainActivity extends AppCompatActivity {
         arrayAdapter = new ProdutoAdapter(getApplicationContext(), arrayList);
 
         String s = "primeiraBusca";
-        buscarProdutos(skip, s);
+        buscarProdutos(skip, s, meuSwitch.isChecked());
+
+        meuSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //String s = "primeiraBusca";
+                //skip = 0;
+                //buscarProdutos(skip, s, meuSwitch.isChecked());
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("genero", meuSwitch.isChecked());
+                editor.apply();
+
+                Intent intent = getIntent();
+                intent.addFlags(intent.FLAG_ACTIVITY_NO_ANIMATION);
+                finish();
+                startActivity(intent);
+            }
+        });
 
         //set the listener and the adapter
         flingContainer.setAdapter(arrayAdapter);
@@ -110,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 // Ask for more data here
                 String s = "";
                 skip = skip + 10;
-                buscarProdutos(skip, s);
+                buscarProdutos(skip, s, meuSwitch.isChecked());
             }
 
             @Override
@@ -135,6 +171,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        overridePendingTransition(0,0);
+    }
+
     // Métodos da toolbar <-------------------------------------------------------------------------
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -145,8 +187,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.comoFunciona:
+            case R.id.meusLikes:
                 startActivity(new Intent(getApplicationContext(), MeusLikesActivity.class));
+                return true;
+            case R.id.genero:
+                selecionarGenero();
                 return true;
             default:return super.onOptionsItemSelected(item);
         }
@@ -200,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
             public void done(ParseObject object, ParseException e) {
                 ParseRelation<ParseObject> relation = object.getRelation("likes");
                 relation.add(meuUsuario);
+                object.increment("likes");
                 object.saveInBackground();
             }
         });
@@ -267,13 +313,21 @@ public class MainActivity extends AppCompatActivity {
         // Cria o relation DisLikes no produto -----------------------------------------------------
     }
 
-    private void buscarProdutos(Integer skip, String busca){
+    private void buscarProdutos(Integer skip, String busca, Boolean feminino){
 
         List<ParseObject> listaBusca = null;
+        String genero;
+        if (feminino){
+            genero = "feminino";
+        } else {
+            genero = "masculino";
+        }
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Produtos");
+        query.whereEqualTo("genero", genero);
         query.whereNotEqualTo("likes", meuUsuario);
         query.whereNotEqualTo("disLikes", meuUsuario);
+        query.orderByDescending("likes");
         query.setSkip(skip);
         query.setLimit(10);
         try {
@@ -284,6 +338,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (listaBusca != null){
             if (!listaBusca.isEmpty()){
+                arrayList.clear();
                 arrayList.addAll(listaBusca);
                 arrayAdapter.notifyDataSetChanged();
                 Log.i("listaBusca", "Não empty");
@@ -321,6 +376,10 @@ public class MainActivity extends AppCompatActivity {
         });
         alertDialog.create();
         alertDialog.show();
+    }
+
+    private void selecionarGenero() {
+
     }
 
 }

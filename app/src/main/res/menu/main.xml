@@ -2,8 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/comoFunciona"
+    <item android:id="@+id/meusLikes"
         android:title="Meus Likes"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/genero"
+        android:title="Feminino/Masculino"
         android:orderInCategory="100"
         app:showAsAction="never"/>
 
