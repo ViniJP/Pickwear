@@ -7,9 +7,4 @@
         android:orderInCategory="100"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/genero"
-        android:title="Feminino/Masculino"
-        android:orderInCategory="100"
-        app:showAsAction="never"/>
-
 </menu>

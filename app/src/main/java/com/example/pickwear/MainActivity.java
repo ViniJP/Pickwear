@@ -40,8 +40,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<ParseObject> arrayAdapter;
     private ArrayList<ParseObject> arrayList;
     private Integer skip = 0;
-    private String string;
-    private Boolean aBoolean;
     private Switch meuSwitch;
     private SharedPreferences sharedPreferences;
 
@@ -50,12 +48,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         meuSwitch = findViewById(R.id.meuSwitchId);
 
         sharedPreferences = getSharedPreferences("preferencias", Context.MODE_PRIVATE);
         if (sharedPreferences.contains("genero")) {
-            Boolean meuBoolean = sharedPreferences.getBoolean("genero", true);
+            boolean meuBoolean = sharedPreferences.getBoolean("genero", true);
             meuSwitch.setChecked(meuBoolean);
         } else {
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -75,15 +72,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        aBoolean = ParseAnonymousUtils.isLinked(ParseUser.getCurrentUser());
         meuUsuario = ParseUser.getCurrentUser();
         try {
-            Log.i("usuario", aBoolean.toString());
             Log.i("usuario", meuUsuario.getObjectId());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         //add the view via xml or programmatically
         SwipeFlingAdapterView flingContainer = (SwipeFlingAdapterView) findViewById(R.id.frame);
 
@@ -97,15 +91,11 @@ public class MainActivity extends AppCompatActivity {
         meuSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //String s = "primeiraBusca";
-                //skip = 0;
-                //buscarProdutos(skip, s, meuSwitch.isChecked());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean("genero", meuSwitch.isChecked());
                 editor.apply();
 
                 Intent intent = getIntent();
-                intent.addFlags(intent.FLAG_ACTIVITY_NO_ANIMATION);
                 finish();
                 startActivity(intent);
             }
@@ -190,20 +180,18 @@ public class MainActivity extends AppCompatActivity {
             case R.id.meusLikes:
                 startActivity(new Intent(getApplicationContext(), MeusLikesActivity.class));
                 return true;
-            case R.id.genero:
-                selecionarGenero();
-                return true;
             default:return super.onOptionsItemSelected(item);
         }
     }
     // Métodos da toolbar <-------------------------------------------------------------------------
 
     private void apagarProdutosAntigos () {
+        Log.i("apagarProdutosAntigos", "acionado");
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
 
         ParseQuery<ParseObject> dislikes = ParseQuery.getQuery("Dislikes");
-        dislikes.whereLessThan("createdAt",calendar.getTime());
+        dislikes.whereLessThan("createdAt", calendar.getTime());
         dislikes.whereEqualTo("usuario", meuUsuario);
         dislikes.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -212,8 +200,14 @@ public class MainActivity extends AppCompatActivity {
                     if (!objects.isEmpty()){
                         for (int i = 0; i < objects.size(); i++){
                             ParseObject object = objects.get(i);
-                            ParseQuery<ParseObject> produto = ParseQuery.getQuery("Produto");
-                            produto.getInBackground(object.get("produto").toString(), new GetCallback<ParseObject>() {
+                            String produtoId = "";
+                            try {
+                                produtoId = object.get("produto").toString();
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
+                            ParseQuery<ParseObject> produto = ParseQuery.getQuery("Produtos");
+                            produto.getInBackground(produtoId, new GetCallback<ParseObject>() {
                                 @Override
                                 public void done(ParseObject object, ParseException e) {
                                     Log.i("BuscaDislikeExclusão", "entrounaSegundabusca");
@@ -245,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
             public void done(ParseObject object, ParseException e) {
                 ParseRelation<ParseObject> relation = object.getRelation("likes");
                 relation.add(meuUsuario);
-                object.increment("likes");
+                object.increment("likesContagem");
                 object.saveInBackground();
             }
         });
@@ -274,11 +268,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void darDislike (ParseObject objetoProduto) {
-        final ParseObject produtoReceb = objetoProduto;
+        final ParseObject produtoRecebido = objetoProduto;
 
         // Cria o objeto DisLikes ------------------------------------------------------------------
         ParseQuery<ParseObject> buscaDisLike = ParseQuery.getQuery("Dislikes");
-        buscaDisLike.whereEqualTo("produto", produtoReceb);
+        buscaDisLike.whereEqualTo("produto", produtoRecebido);
         buscaDisLike.whereEqualTo("usuario", meuUsuario);
         buscaDisLike.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -289,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("darDislike","vazio");
                         ParseObject disLikes = new ParseObject("Dislikes");
                         disLikes.put("usuario", meuUsuario);
-                        disLikes.put("livro", produtoReceb);
+                        disLikes.put("produto", produtoRecebido);
                         disLikes.saveInBackground();
                     }
                     Log.i("darDislike","nao vazio");
@@ -304,17 +298,19 @@ public class MainActivity extends AppCompatActivity {
         acharProduto.getInBackground(objetoProduto.getObjectId(), new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject object, ParseException e) {
-                ParseRelation<ParseObject> relation = object.getRelation("disLikes");
-                relation.add(meuUsuario);
-                //object.put("disLikes", meuUsuario);
-                object.saveInBackground();
+                if (e == null) {
+                    if (object != null) {
+                        ParseRelation<ParseObject> relation = object.getRelation("disLikes");
+                        relation.add(meuUsuario);
+                        object.saveInBackground();
+                    }
+                }
             }
         });
         // Cria o relation DisLikes no produto -----------------------------------------------------
     }
 
     private void buscarProdutos(Integer skip, String busca, Boolean feminino){
-
         List<ParseObject> listaBusca = null;
         String genero;
         if (feminino){
@@ -322,12 +318,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             genero = "masculino";
         }
-
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Produtos");
         query.whereEqualTo("genero", genero);
         query.whereNotEqualTo("likes", meuUsuario);
         query.whereNotEqualTo("disLikes", meuUsuario);
-        query.orderByDescending("likes");
+        query.orderByDescending("likesContagem");
         query.setSkip(skip);
         query.setLimit(10);
         try {
@@ -366,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
     public void criarAlertDialogBusca(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
         alertDialog.setTitle("Sua busca não retornou resultado.");
-        alertDialog.setMessage("Ainda não temos produtos na sua área, que tal compartilhar o APP com seus amigos?");
+        alertDialog.setMessage("Ainda não temos produtos na sua área! Tente novamente.");
         alertDialog.setCancelable(true);
         alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
@@ -376,10 +371,6 @@ public class MainActivity extends AppCompatActivity {
         });
         alertDialog.create();
         alertDialog.show();
-    }
-
-    private void selecionarGenero() {
-
     }
 
 }

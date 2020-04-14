@@ -5,6 +5,6 @@
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
 
     <!-- activity swype -->
-    <string name="curti">Curti</string>
-    <string name="nao_curti">Não curti</string>
+    <string name="curti">Curtir</string>
+    <string name="nao_curti">Não curtir</string>
 </resources>

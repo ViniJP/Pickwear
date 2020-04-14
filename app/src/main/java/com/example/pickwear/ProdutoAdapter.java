@@ -21,13 +21,13 @@ public class ProdutoAdapter extends ArrayAdapter<ParseObject> {
 
     private Context contexto;
     private ArrayList<ParseObject> produtos;
+    private TextView mostraProdutos;
+    private ImageView mostraImagem;
 
-
-    public ProdutoAdapter(@NonNull Context context, ArrayList list) {
+    public ProdutoAdapter(@NonNull Context context, ArrayList<ParseObject> list) {
         super(context, 0, list);
         this.contexto = context;
         this.produtos = list;
-
     }
 
     @NonNull
@@ -37,7 +37,7 @@ public class ProdutoAdapter extends ArrayAdapter<ParseObject> {
 
         if (view == null) {
             try {
-                LayoutInflater inflater = (LayoutInflater) contexto.getSystemService(contexto.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = (LayoutInflater) contexto.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 view = inflater.inflate(R.layout.item, parent, false);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -45,13 +45,16 @@ public class ProdutoAdapter extends ArrayAdapter<ParseObject> {
         }
 
         ParseObject meusProdutos = produtos.get(position);
-        TextView mostraProdutos = view.findViewById(R.id.tituloProduto);
+        if (view != null) {
+            mostraProdutos = view.findViewById(R.id.tituloProduto);
+            mostraImagem = view.findViewById(R.id.imagemProdutoItem);
+        }
         mostraProdutos.setText(meusProdutos.getString("titulo"));
-        ImageView mostraImagem = view.findViewById(R.id.imagemProdutoItem);
 
         String link = meusProdutos.getString("linkImagem");
         if (link != null) {
             if (!link.isEmpty()) {
+                Log.i("imagemCard: ", "Do Link");
                 Picasso.get()
                         .load(link)
                         .resize(480, 640)
@@ -59,6 +62,7 @@ public class ProdutoAdapter extends ArrayAdapter<ParseObject> {
                         .into(mostraImagem);
             } else {
                 if (meusProdutos.getParseFile("imagem") != null) {
+                    Log.i("imagemCard: ", "Do back4app");
                     Picasso.get()
                             .load(meusProdutos.getParseFile("imagem").getUrl())
                             .resize(480, 640)
@@ -68,6 +72,7 @@ public class ProdutoAdapter extends ArrayAdapter<ParseObject> {
             }
         } else {
             if (meusProdutos.getParseFile("imagem") != null) {
+                Log.i("imagemCard: ", "Do back4app");
                 Picasso.get()
                         .load(meusProdutos.getParseFile("imagem").getUrl())
                         .resize(480, 640)

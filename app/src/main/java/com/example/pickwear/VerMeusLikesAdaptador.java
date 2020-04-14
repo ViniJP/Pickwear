@@ -22,7 +22,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-
 public class VerMeusLikesAdaptador extends RecyclerView.Adapter<VerMeusLikesAdaptador.MyViewHolder> {
 
     private ArrayList<ParseObject> produtos;
@@ -45,7 +44,6 @@ public class VerMeusLikesAdaptador extends RecyclerView.Adapter<VerMeusLikesAdap
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
         final ParseObject objeto = produtos.get(position);
-        Log.i("AdaptadorMeusLikes", objeto.getObjectId());
         holder.titulo.setText(objeto.get("titulo").toString());
 
         String link = objeto.getString("linkImagem");
@@ -79,7 +77,6 @@ public class VerMeusLikesAdaptador extends RecyclerView.Adapter<VerMeusLikesAdap
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(contexto, objeto.getString("titulo"), Toast.LENGTH_SHORT).show();
                 alert(objeto);
             }
         });
@@ -121,13 +118,11 @@ public class VerMeusLikesAdaptador extends RecyclerView.Adapter<VerMeusLikesAdap
     }
 
     private void redirecionarSite (ParseObject objeto) {
-
         String string = objeto.getString("linkProduto");
         Uri uri = Uri.parse(string);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         contexto.startActivity(intent);
-
     }
 
 }

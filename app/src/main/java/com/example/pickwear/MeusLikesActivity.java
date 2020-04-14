@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import com.parse.FindCallback;
@@ -24,6 +25,7 @@ public class MeusLikesActivity extends AppCompatActivity {
     private RecyclerView meuRecycler;
     private ArrayList<ParseObject> produtos;
     private VerMeusLikesAdaptador adaptador;
+    private LinearLayout naoTemLike;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +33,7 @@ public class MeusLikesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_meus_likes);
 
         meuRecycler = findViewById(R.id.recycler_meus_likes);
-
-
+        naoTemLike = findViewById(R.id.linear_nao_like);
         produtos = new ArrayList<>();
         adaptador = new VerMeusLikesAdaptador(produtos, MeusLikesActivity.this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
@@ -40,10 +41,7 @@ public class MeusLikesActivity extends AppCompatActivity {
         meuRecycler.setHasFixedSize(true);
         meuRecycler.addItemDecoration(new DividerItemDecoration(getApplicationContext(), LinearLayout.VERTICAL));
         meuRecycler.setAdapter(adaptador);
-
         buscarProdutos();
-
-
     }
 
     private void buscarProdutos(){
@@ -60,16 +58,15 @@ public class MeusLikesActivity extends AppCompatActivity {
                     if (objects != null) {
                         Log.i("MeusLikes", "busca nao deu null");
                         if (!objects.isEmpty()){
-                            Log.i("MeusLikes", objects.get(0).getObjectId());
-                            Log.i("MeusLikes", objects.get(0).getParseObject("produto").getObjectId());
                             for (int i = 0; i < objects.size(); i++) {
                                 ParseObject objeto = objects.get(i);
                                 ParseObject objetoProduto = objeto.getParseObject("produto");
                                 produtos.add(objetoProduto);
-                                adaptador.notifyDataSetChanged();
+                                adaptador.notifyItemInserted(i);
                             }
                             Log.i("MeusLikes", "nao deu empty");
                         } else {
+                            mostrarMensagemEmpty();
                             Log.i("MeusLikes", "deu empty");
                         }
                     } else {
@@ -79,6 +76,10 @@ public class MeusLikesActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void mostrarMensagemEmpty() {
+        naoTemLike.setVisibility(View.VISIBLE);
     }
 
 }
